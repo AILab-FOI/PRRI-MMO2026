@@ -1,6 +1,3 @@
-## 3D modeli
+# PRRI-MMO2026
 
-### FOI zgrada
-- GLB model (Google Drive) - https://drive.google.com/drive/folders/1wsfzMbI0CHkwFjxSMej4i1l1XxF3HtJh?usp=drive_link
-- Generirano s Tencent Hunyuan 3D
-- Model je na Driveu jer je prevelik za GitHub
+An educational MMO Roblox game developed by students and the [Artificial Intelligence Laboratory](https://ai.foi.hr/) at the [University of Zagreb Faculty of Organization and Informatics](https://www.foi.unizg.hr/). The game is developed using Roblox Studio. More details available at [itch.io](https://ailab-foi.itch.io/prri-mmo2026).
