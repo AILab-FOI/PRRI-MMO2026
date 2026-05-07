@@ -52,11 +52,11 @@ Projekt koristi sljedeće tehnologije i alate:
 
 # Struktura projekta
 
-docs/                   -> dokumentacija projekta
-scripts/                -> gameplay skripte i logika
-location_models/        -> 3D modeli lokacija
-music/                  -> audio i glazba
-educational-game.rbxl   -> Roblox projekt
+- docs/                   -> dokumentacija projekta 
+- scripts/                -> gameplay skripte i logika
+- location_models/        -> 3D modeli lokacija
+- music/                  -> audio i glazba
+- educational-game.rbxl   -> Roblox projekt
 
 ---
 
@@ -87,13 +87,13 @@ Razvoj projekta organiziran je kroz:
 
 | Član | Uloga |
 |---|---|
-| David Čuturić | Voditelj projekta / Dizajn |
-| Luka Šuto | Programiranje |
-| Mario Tomljanović | UI/UX Dizajn |
-| Jan Buruš | Asseti / Zvuk |
-| Hrvoje Mišanec | Dizajn lokacija |
-| Filip Knapić | Programiranje |
-| Martin Trtanj | Optimizacija / Zvuk |
+| David Čuturić | Voditelj projekta / Dizajner |
+| Luka Šuto | Programer / Tester |
+| Mario Tomljanović |Dizajner / Tester |
+| Jan Buruš | Dizajner / Zvuk i glazba |
+| Hrvoje Mišanec | Dizajner / Tester |
+| Filip Knapić | Programer / Zvuk i glazba |
+| Martin Trtanj | Programer / Zvuk i glazba |
 
 ---
 
