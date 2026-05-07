@@ -52,7 +52,6 @@ Projekt koristi sljedeće tehnologije i alate:
 
 # Struktura projekta
 
-```text
 docs/                   -> dokumentacija projekta
 scripts/                -> gameplay skripte i logika
 location_models/        -> 3D modeli lokacija
