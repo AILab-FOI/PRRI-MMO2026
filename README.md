@@ -55,7 +55,8 @@ Projekt koristi sljedeće tehnologije i alate:
 - docs/                   -> dokumentacija projekta 
 - scripts/                -> gameplay skripte i logika
 - location_models/        -> 3D modeli lokacija
-- music/                  -> audio i glazba
+- sound/                  -> audio i glazba
+- collectibles/           -> kolekcionarski predmeti
 - educational-game.rbxl   -> Roblox projekt
 
 ---
