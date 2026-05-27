@@ -1,0 +1,205 @@
+local Players = game:GetService("Players")
+local Debris = game:GetService("Debris")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local rampModel = workspace:WaitForChild("Rampra Mini")
+local startPart = rampModel:WaitForChild("start_ramp_game")
+
+local ragdollEvent = ReplicatedStorage:FindFirstChild("RampBallRagdoll")
+if not ragdollEvent then
+	ragdollEvent = Instance.new("RemoteEvent")
+	ragdollEvent.Name = "RampBallRagdoll"
+	ragdollEvent.Parent = ReplicatedStorage
+end
+
+local ballNames = {"kugla1", "kugla2", "kugla3"}
+
+local ballTemplates = {}
+local spawnPositions = {}
+
+local ROUND_TIME = 70
+local MIN_SPAWN_WAIT = 0.8
+local MAX_SPAWN_WAIT = 1.4
+local BALL_LIFETIME = 15
+
+local BALL_SPEED = 50
+local RANDOM_SIDE_FORCE = 0
+
+local PLAYER_PUSH_FORCE = 110
+
+local BALL_DENSITY = 20
+local BALL_FRICTION = 0.2
+local BALL_ELASTICITY = 0.1
+
+local gameActive = false
+
+local activeBallsFolder = rampModel:FindFirstChild("ActiveBalls")
+if not activeBallsFolder then
+	activeBallsFolder = Instance.new("Folder")
+	activeBallsFolder.Name = "ActiveBalls"
+	activeBallsFolder.Parent = rampModel
+end
+
+for _, ballName in ipairs(ballNames) do
+	local ball = rampModel:WaitForChild(ballName)
+
+	ball:SetAttribute("OriginalTransparency", ball.Transparency)
+
+	table.insert(ballTemplates, ball)
+	table.insert(spawnPositions, ball.CFrame)
+
+	ball.Transparency = 1
+	ball.CanCollide = false
+	ball.CanTouch = false
+	ball.Anchored = true
+end
+
+startPart.Transparency = 1
+startPart.CanCollide = false
+startPart.CanTouch = true
+startPart.Anchored = true
+
+local function randomNumber(min, max)
+	return min + math.random() * (max - min)
+end
+
+local function pushPlayer(ball, hit)
+	local character = hit:FindFirstAncestorOfClass("Model")
+	if not character then return end
+
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	local rootPart = character:FindFirstChild("HumanoidRootPart")
+
+	if not humanoid or not rootPart then return end
+	if humanoid.Health <= 0 then return end
+
+	local player = Players:GetPlayerFromCharacter(character)
+	if not player then return end
+
+	local direction = ball.AssemblyLinearVelocity
+
+	if direction.Magnitude < 1 then
+		direction = rootPart.Position - ball.Position
+	end
+
+	direction = Vector3.new(direction.X, 0, direction.Z)
+
+	if direction.Magnitude < 1 then return end
+
+	direction = direction.Unit
+
+	ragdollEvent:FireClient(player, direction, PLAYER_PUSH_FORCE)
+	
+	print("SERVER: Lopta je pogodila", player.Name)
+	ragdollEvent:FireClient(player, direction, PLAYER_PUSH_FORCE)
+end
+
+local function spawnBall()
+	local template = ballTemplates[math.random(1, #ballTemplates)]
+	local spawnCFrame = spawnPositions[math.random(1, #spawnPositions)]
+
+	local ball = template:Clone()
+	ball.Name = "falling_ball"
+	ball.Parent = activeBallsFolder
+
+	ball.Transparency = template:GetAttribute("OriginalTransparency") or 0
+	ball.CanCollide = true
+	ball.CanTouch = true
+	ball.Anchored = false
+	ball.Massless = false
+
+	ball.CustomPhysicalProperties = PhysicalProperties.new(
+		BALL_DENSITY,
+		BALL_FRICTION,
+		BALL_ELASTICITY,
+		1,
+		1
+	)
+
+	local randomX = math.random(-1, 1)
+	local randomZ = math.random(-1, 1)
+
+	ball.CFrame = spawnCFrame * CFrame.new(randomX, 0, randomZ)
+
+	pcall(function()
+		ball:SetNetworkOwner(nil)
+	end)
+
+	local direction = startPart.Position - ball.Position
+	local flatDirection = Vector3.new(direction.X, 0, direction.Z)
+
+	if flatDirection.Magnitude > 0 then
+		flatDirection = flatDirection.Unit
+	end
+
+	local randomSide = Vector3.new(
+		math.random(-RANDOM_SIDE_FORCE, RANDOM_SIDE_FORCE),
+		0,
+		math.random(-RANDOM_SIDE_FORCE, RANDOM_SIDE_FORCE)
+	)
+
+	ball.AssemblyLinearVelocity = flatDirection * BALL_SPEED + randomSide + Vector3.new(0, -5, 0)
+
+	ball.AssemblyAngularVelocity = Vector3.new(
+		math.random(-8, 8),
+		math.random(-8, 8),
+		math.random(-8, 8)
+	)
+
+	local alreadyHitPlayers = {}
+
+	ball.Touched:Connect(function(hit)
+		if not ball or not ball.Parent then return end
+
+		if hit == startPart then
+			ball:Destroy()
+			return
+		end
+
+		local character = hit:FindFirstAncestorOfClass("Model")
+		if not character then return end
+
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		if not humanoid then return end
+
+		if alreadyHitPlayers[character] then return end
+		alreadyHitPlayers[character] = true
+
+		pushPlayer(ball, hit)
+
+		task.delay(0.5, function()
+			alreadyHitPlayers[character] = nil
+		end)
+	end)
+
+	Debris:AddItem(ball, BALL_LIFETIME)
+end
+
+local function startRampGame(player)
+	if gameActive then
+		return
+	end
+
+	gameActive = true
+	print(player.Name .. " je pokrenuo ramp minigame")
+
+	local startTime = os.clock()
+
+	while os.clock() - startTime < ROUND_TIME do
+		spawnBall()
+		task.wait(randomNumber(MIN_SPAWN_WAIT, MAX_SPAWN_WAIT))
+	end
+
+	gameActive = false
+	print("Ramp minigame je završio")
+end
+
+startPart.Touched:Connect(function(hit)
+	local character = hit:FindFirstAncestorOfClass("Model")
+	if not character then return end
+
+	local player = Players:GetPlayerFromCharacter(character)
+	if not player then return end
+
+	startRampGame(player)
+end)
