@@ -1,8 +1,13 @@
-local artefakt = script.Parent
+local model = script.Parent
+local BRZINA_ROTACIJE = 2
 
-task.spawn(function()
-	while artefakt and artefakt.Parent do
-		artefakt.CFrame = artefakt.CFrame * CFrame.Angles(0, math.rad(2), 0)
-		task.wait(0.01)
-	end
-end)
+while true do
+	local trenutniPivot = model:GetPivot()
+	local pozicija = trenutniPivot.Position
+
+	local rotacijaY = CFrame.Angles(0, math.rad(BRZINA_ROTACIJE), 0)
+
+	model:PivotTo(CFrame.new(pozicija) * (trenutniPivot - pozicija) * rotacijaY)
+
+	task.wait()
+end
